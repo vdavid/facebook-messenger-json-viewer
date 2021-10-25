@@ -1,4 +1,7 @@
 export const AppContext = React.createContext();
+/**
+ * @returns {{myName: string, setMyName: (string) => void, chatLog: ChatLog, setChatLog: (ChatLog) => void}}
+ */
 export const useAppContext = () => React.useContext(AppContext);
 
 /**
@@ -9,14 +12,11 @@ export const useAppContext = () => React.useContext(AppContext);
  */
 export default function AppContextProvider({children}) {
     const [myName, setMyName] = React.useState(null);
-    const [title, setTitle] = React.useState(null);
-    const [participantNames, setParticipantNames] = React.useState([]);
-    const [messages, setMessages] = React.useState([]);
+    const [chatLog, setChatLog] = React.useState(null);
 
     return React.createElement(AppContext.Provider, {value: {
             myName, setMyName,
-            title, setTitle,
-            participantNames, setParticipantNames,
-            messages, setMessages,
+            chatLog, setChatLog,
+            isLoaded: !!chatLog
         }}, children);
 }
