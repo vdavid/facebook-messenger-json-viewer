@@ -3,6 +3,6 @@
  * But this is a completely revamped app.
  */
 
-import App from './App.mjs';
+import App from './components/App.mjs';
 
 ReactDOM.render(React.createElement(App), document.getElementById('app'));
