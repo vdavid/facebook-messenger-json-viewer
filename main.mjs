@@ -1,3 +1,6 @@
+import ChatBubble from './ChatBubble.mjs';
+import ChatArea from './ChatArea.mjs';
+
 let myName;
 let cleanedData;
 
@@ -18,7 +21,7 @@ ReactDOM.render(
 function handleSubmit() {
     ReactDOM.render(React.createElement(ChatArea), document.querySelector('#chat-area'));
     const domChat = document.querySelector('#chat-display');
-    ReactDOM.render(React.createElement(ChatBubble, cleanedData.msgs), domChat);
+    ReactDOM.render(React.createElement(ChatBubble, {msgs: cleanedData.msgs, myName}), domChat);
     addChatTitle();
 }
 
@@ -26,7 +29,7 @@ function readJSON(file) {
     const reader = new FileReader();
 
     reader.addEventListener('load', (event) => {
-        console.log('JSON load sucessful');
+        console.log('JSON load successful');
         const msgObject = JSON.parse(event.target.result.toString());
         cleanedData = cleanData(msgObject);
         promptParticipantRadio(cleanedData.participants);
@@ -39,7 +42,7 @@ function readJSON(file) {
 
 /**
  * @param {{title: string, participants: {name: string}[], messages: [{sender_name: string, timestamp_ms: number, content: string}]}} raw
- * @returns {{msgs: [{sender_name: string, timestamp_ms: number, content: string}], title: string, participants: string[]}}
+ * @returns {{msgs: {sender_name: string, timestamp_ms: number, content: string}[], title: string, participants: string[]}}
  */
 function cleanData(raw) {
     const participants = raw.participants.map(person => person.name);
@@ -89,57 +92,5 @@ function radioClick(name) {
     console.log(`Setting ${name} as blue bubble`);
 }
 
-class ChatBubble extends React.Component {
-    /**
-     * @param {{sender_name: string, timestamp_ms: number, content: string}} msg
-     * @returns {*}
-     */
-    generateBubbles(msg) {
-        if (msg.sender_name === myName) {
-            return (
-                React.createElement(
-                    'div', {className: 'message-container'},
-                    React.createElement('div', {className: 'name-right'}, msg.sender_name),
-                    React.createElement('div', {className: 'bubble-right'}, msg.content),
-                    React.createElement('span', {className: 'tooltip-right'}, convertTimestampToString(msg.timestamp_ms)),
-                )
-            );
-        } else {
-            return (
-                React.createElement(
-                    'div', {className: 'message-container'},
-                    React.createElement('div', {className: 'name-left'}, msg.sender_name),
-                    React.createElement('div', {className: 'bubble-left'}, msg.content),
-                    React.createElement('span', {className: 'tooltip-left'}, convertTimestampToString(msg.timestamp_ms)),
-                )
-            );
-        }
 
-    }
 
-    render() {
-        return (
-            cleanedData.msgs.map(msg => this.generateBubbles(msg))
-        );
-    }
-}
-
-class ChatArea extends React.Component {
-    render() {
-        return (
-            React.createElement('div', {id: 'chat-display'}, null)
-        );
-    }
-}
-
-function convertTimestampToString(unixTimestamp) {
-    const date = new Date(unixTimestamp);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const year = date.getFullYear();
-    const month = months[date.getMonth()];
-    const day = date.getDate();
-    const hour = date.getHours();
-    const min = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    const sec = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-    return day + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-}
