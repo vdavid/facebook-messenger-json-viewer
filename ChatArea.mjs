@@ -1,5 +1,7 @@
+import {useAppContext} from './AppContextProvider.mjs';
+import ChatBubble from './ChatBubble.mjs';
+
 export default function ChatArea() {
-    return (
-        React.createElement('div', {id: 'chat-display'}, null)
-    );
+    const {messages, myName} = useAppContext();
+    return React.createElement('div', {id: 'chat-display'}, messages.map(message => ChatBubble({message, myName})));
 }
