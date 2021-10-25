@@ -34,12 +34,12 @@ function readJsonFile(file) {
  * @returns {Promise<title: string, participantNames: string[], {messages: {senderName: string, timestamp: number, content: string}[]}>}
  */
 function cleanData(raw) {
-    const participants = raw.participants.map(person => person.name);
+    const participants = raw.participants.map(person => convertUtf8ToUtf16(person.name));
     const title = raw.title;
     const messages = raw.messages.reverse().map(rawMessage => ({
-            senderName: rawMessage.sender_name,
+            senderName: convertUtf8ToUtf16(rawMessage.sender_name),
             timestamp: rawMessage.timestamp_ms,
-            content: rawMessage.content,
+            content: convertUtf8ToUtf16(rawMessage.content),
             type: rawMessage.type,
             isUnsent: rawMessage.is_unsent,
     }));
@@ -48,4 +48,16 @@ function cleanData(raw) {
         participantNames: participants,
         messages: messages,
     };
+}
+
+/**
+ * Source: https://stackoverflow.com/questions/52747566/what-encoding-facebook-uses-in-json-files-from-data-export
+ *
+ * @param {string} string
+ * @returns {string}
+ */
+function convertUtf8ToUtf16(string) {
+    let decoder = new TextDecoder();
+    let characters = string ? string.split('').map(character => character.charCodeAt(0)) : [];
+    return decoder.decode(new Uint8Array(characters));
 }
