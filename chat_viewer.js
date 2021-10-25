@@ -1,141 +1,145 @@
-const e = React.createElement;
-var myName;
-var cleanedData;
+let myName;
+let cleanedData;
 
 const fileSelector = document.getElementById('fileupload');
 fileSelector.addEventListener('change', (event) => {
-  const fileList = event.target.files;
-  console.log(fileList);
-  readJSON(fileList[0]);
+    const fileList = event.target.files;
+    console.log(fileList);
+    readJSON(fileList[0]);
 });
 
 const domButton = document.querySelector('#submit-button');
 ReactDOM.render(
-  e('button', {onClick: () => handleSubmit()}, "Submit"),
-  domButton
+    React.createElement('button', {onClick: () => handleSubmit()}, 'Submit'),
+    domButton,
 );
 
 
-function handleSubmit(){
-  ReactDOM.render(e(ChatArea), document.querySelector('#chat-area'))
-  const domChat = document.querySelector('#chat-display');
-  ReactDOM.render(e(ChatBubble, cleanedData.msgs), domChat);
-  addChatTitle();
+function handleSubmit() {
+    ReactDOM.render(React.createElement(ChatArea), document.querySelector('#chat-area'));
+    const domChat = document.querySelector('#chat-display');
+    ReactDOM.render(React.createElement(ChatBubble, cleanedData.msgs), domChat);
+    addChatTitle();
 }
 
 function readJSON(file) {
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.addEventListener('load', (event) => {
-    console.log("JSON load sucessful");
-    msgObject = JSON.parse(event.target.result);
-    cleanedData = cleanData(msgObject);
-    promptParticipantRadio(cleanedData.participants);
-  });
+    reader.addEventListener('load', (event) => {
+        console.log('JSON load sucessful');
+        const msgObject = JSON.parse(event.target.result.toString());
+        cleanedData = cleanData(msgObject);
+        promptParticipantRadio(cleanedData.participants);
+    });
 
-  reader.readAsText(file);
+    reader.readAsText(file);
 
-  
+
 }
 
+/**
+ * @param {{title: string, participants: {name: string}[], messages: [{sender_name: string, timestamp_ms: number, content: string}]}} raw
+ * @returns {{msgs: [{sender_name: string, timestamp_ms: number, content: string}], title: string, participants: string[]}}
+ */
 function cleanData(raw) {
-  var participants = raw.participants.map(person => person.name);
-  var title = raw.title;
-  var msgs = raw.messages.reverse();
-  var cleaned = {
-    "participants": participants,
-    "title": title,
-    "msgs": msgs,
-  }
-
-  return cleaned
+    const participants = raw.participants.map(person => person.name);
+    const title = raw.title;
+    const msgs = raw.messages.reverse();
+    return {
+        'participants': participants,
+        'title': title,
+        'msgs': msgs,
+    };
 }
 
 function addChatTitle() {
-  const chatTitle = document.querySelector('#chat-title')
-  ReactDOM.render(e('h2', {}, cleanedData.title), chatTitle);
+    const chatTitle = document.querySelector('#chat-title');
+    ReactDOM.render(React.createElement('h2', {}, cleanedData.title), chatTitle);
 }
 
-function promptParticipantRadio(participants){
-  const participantsRadio = document.querySelector('#participants-radio');
-  var radioElements = []
+function promptParticipantRadio(participants) {
+    const participantsRadio = document.querySelector('#participants-radio');
+    const radioElements = [];
 
-  radioElements.push(e('p', {}, 'Which participant are you?'))
+    radioElements.push(React.createElement('p', {}, 'Which participant are you?'));
 
-  participants.forEach(function (n, i) {
-    radioElements.push(
-      e('input', {
-        type: 'radio', 
-        name: 'participant', 
-        onClick: () => radioClick(n), 
-        id: ("radio-button-" + i)
-      })
-    );
-    radioElements.push(
-      e('label', {onClick: () => document.getElementById('radio-button-' + i).click()}, n)
-    );
-    radioElements.push(e('br'));
-  });
-  ReactDOM.render(radioElements, 
-                  participantsRadio);
-        
-  document.querySelector("#radio-button-0").click();
+    participants.forEach(function (n, i) {
+        radioElements.push(
+            React.createElement('input', {
+                type: 'radio',
+                name: 'participant',
+                onClick: () => radioClick(n),
+                id: ('radio-button-' + i),
+            }),
+        );
+        radioElements.push(
+            React.createElement('label', {onClick: () => document.getElementById('radio-button-' + i).click()}, n),
+        );
+        radioElements.push(React.createElement('br'));
+    });
+    ReactDOM.render(radioElements,
+        participantsRadio);
+
+    document.querySelector('#radio-button-0').click();
 
 }
 
 function radioClick(name) {
-  myName = name;
-  console.log(`Setting ${name} as blue bubble`);
+    myName = name;
+    console.log(`Setting ${name} as blue bubble`);
 }
 
 class ChatBubble extends React.Component {
-  generateBubbles(msg) {
-    if (msg.sender_name == myName) {
-      return (
-        e(
-          'div', {className: "message-container"}, 
-          e('div', {className: "name-right"}, msg.sender_name),
-          e('div', {className: "bubble-right"}, msg.content),
-          e('span', {className: "tooltip-right"}, timeConverter(msg.timestamp_ms))
-        )
-      );
-    } else {
-      return (
-        e(
-          'div', {className: "message-container"}, 
-          e('div', {className: "name-left"}, msg.sender_name),
-          e('div', {className: "bubble-left"}, msg.content),
-          e('span', {className: "tooltip-left"}, timeConverter(msg.timestamp_ms))
-        )
-      );
+    /**
+     * @param {{sender_name: string, timestamp_ms: number, content: string}} msg
+     * @returns {*}
+     */
+    generateBubbles(msg) {
+        if (msg.sender_name === myName) {
+            return (
+                React.createElement(
+                    'div', {className: 'message-container'},
+                    React.createElement('div', {className: 'name-right'}, msg.sender_name),
+                    React.createElement('div', {className: 'bubble-right'}, msg.content),
+                    React.createElement('span', {className: 'tooltip-right'}, convertTimestampToString(msg.timestamp_ms)),
+                )
+            );
+        } else {
+            return (
+                React.createElement(
+                    'div', {className: 'message-container'},
+                    React.createElement('div', {className: 'name-left'}, msg.sender_name),
+                    React.createElement('div', {className: 'bubble-left'}, msg.content),
+                    React.createElement('span', {className: 'tooltip-left'}, convertTimestampToString(msg.timestamp_ms)),
+                )
+            );
+        }
+
     }
 
-  }
-  render() {
-    return (
-      cleanedData.msgs.map(msg => this.generateBubbles(msg))
-      )
-  }
+    render() {
+        return (
+            cleanedData.msgs.map(msg => this.generateBubbles(msg))
+        );
+    }
 }
 
 class ChatArea extends React.Component {
-  render() {
-    return (
-      e('div', {id: "chat-display"}, null)
-    );
-      
-  }
+    render() {
+        return (
+            React.createElement('div', {id: 'chat-display'}, null)
+        );
+    }
 }
 
-function timeConverter(UNIX_timestamp){
-  var a = new Date(UNIX_timestamp);
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = months[a.getMonth()];
-  var date = a.getDate();
-  var hour = a.getHours();
-  var min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes();
-  var sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
-  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-  return time;
+function convertTimestampToString(unixTimestamp) {
+    const date = new Date(unixTimestamp);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const year = date.getFullYear();
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const hour = date.getHours();
+    const min = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
+    const sec = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    return day + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
 }
