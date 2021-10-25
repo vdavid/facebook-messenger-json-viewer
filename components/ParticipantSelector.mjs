@@ -1,14 +1,15 @@
 import {useAppContext} from './AppContextProvider.mjs';
 
 export default function ParticipantSelector() {
-    const {isLoaded, setMyName, chatLog} = useAppContext();
+    const {isLoaded, setMyName, myName, chatLog} = useAppContext();
     const radioElements = isLoaded ? chatLog.participantNames.map((participantName, index) =>
         ([React.createElement('input', {
             type: 'radio',
             name: 'participant',
-            onClick: () => radioClick(participantName),
+            onClick: () => handleClick(participantName),
             id: ('radio-button-' + index),
             key: index,
+            checked: myName === participantName,
         }),
             React.createElement('label', {for: 'radio-button-' + index}, participantName),
             React.createElement('br'),
@@ -16,8 +17,11 @@ export default function ParticipantSelector() {
     ) : [];
 
     React.useEffect(() => {
-        isLoaded && chatLog.participantNames.length && radioClick(chatLog.participantNames[0]);
-    }, [isLoaded, chatLog && chatLog.participantNames]);
+        const storedMyName = loadFromLocalStorage();
+        if (storedMyName) {
+            setMyName(storedMyName);
+        }
+    }, []);
 
     if (isLoaded && chatLog.participantNames.length) {
         return [
@@ -28,9 +32,17 @@ export default function ParticipantSelector() {
         return null;
     }
 
-    function radioClick(name) {
+    function handleClick(name) {
+        saveToLocalStorage(name);
         setMyName(name);
-        console.log(`Setting ${name} as blue bubble`);
     }
+}
+
+function saveToLocalStorage(myName) {
+    localStorage.setItem('myName', myName);
+}
+
+function loadFromLocalStorage() {
+    return localStorage.getItem('myName');
 }
 

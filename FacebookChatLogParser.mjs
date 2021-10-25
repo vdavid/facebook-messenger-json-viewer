@@ -1,22 +1,22 @@
 /**
- * @typedef {object} FacebookChatLog
+ * @typedef {object} RawFacebookChatLog
  * @property {string} title
  * @property {boolean} is_still_participant
  * @property {string} thread_type "RegularGroup"
  * @property {string} thread_path E.g. "inbox/inerpego_ksa5pdiv5a"
  * @property {string[]} magic_words
  * @property {{uri: string, creation_timestamp: number}} image
- * @property {FacebookChatParticipant[]} participants
- * @property {FacebookMessage[]} messages
+ * @property {RawFacebookChatParticipant[]} participants
+ * @property {RawFacebookMessage[]} messages
  */
 
 /**
- * @typedef {object} FacebookChatParticipant
+ * @typedef {object} RawFacebookChatParticipant
  * @property {string} name
  */
 
 /**
- * @typedef {object} FacebookMessage
+ * @typedef {object} RawFacebookMessage
  * @property {string} sender_name
  * @property {number} timestamp_ms
  * @property {string} content
@@ -57,22 +57,22 @@ export default class FacebookChatLogParser {
     }
 
     /**
-     * @param {FacebookChatLog} chatLog
+     * @param {RawFacebookChatLog} rawFacebookChatLog
      * @returns {ChatLog}
      */
-    parse(chatLog) {
-        if (chatLog.thread_type !== 'RegularGroup') {
-            console.log('New thread type found! ' + chatLog.thread_type);
+    parse(rawFacebookChatLog) {
+        if (rawFacebookChatLog.thread_type !== 'RegularGroup') {
+            console.log('New thread type found! ' + rawFacebookChatLog.thread_type);
         }
         return {
-            title: chatLog.title,
+            title: this.convertUtf8ToUtf16(rawFacebookChatLog.title),
 //            isStillParticipant: messageJsonFile.is_still_participant,
 //            threadType: messageJsonFile.thread_type,
-            threadPath: chatLog.thread_path,
-            magicWords: chatLog.magic_words,
-            imageUrl: chatLog.image.uri,
-            participantNames: chatLog.participants.map(person => this.convertUtf8ToUtf16(person.name)),
-            messages: chatLog.messages.reverse().map(message => ({
+            threadPath: rawFacebookChatLog.thread_path,
+            magicWords: rawFacebookChatLog.magic_words,
+            imageUrl: rawFacebookChatLog.image ? rawFacebookChatLog.image.uri : null,
+            participantNames: rawFacebookChatLog.participants.map(person => this.convertUtf8ToUtf16(person.name)),
+            messages: rawFacebookChatLog.messages.reverse().map(message => ({
                 senderName: this.convertUtf8ToUtf16(message.sender_name),
                 timestampMilliseconds: message.timestamp_ms,
                 content: this.convertUtf8ToUtf16(message.content),
