@@ -77,7 +77,7 @@ export default class FacebookChatLogParser {
                 timestampMilliseconds: message.timestamp_ms,
                 content: this.convertUtf8ToUtf16(message.content),
                 stickerUrl: (message.sticker || {}).uri,
-                reactions: (message.reactions || []).map(reaction => ({emoji: reaction.reaction, actorName: reaction.actor})),
+                reactions: (message.reactions || []).map(reaction => ({emoji: this.convertUtf8ToUtf16(reaction.reaction), actorName: this.convertUtf8ToUtf16(reaction.actor)})),
                 shareUrl: (message.share || {}).link,
                 photoUrls: (message.photos || []).map(photo => photo.uri),
                 type: message.type,
